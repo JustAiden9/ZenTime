@@ -12,6 +12,9 @@ struct ContentView: View {
     @State private var isTimerRunning = false
     @State private var timer: Timer?
     
+    @State private var selectedMinutes = 1
+    @State private var selectedSeconds = 0
+    
     var body: some View {
         VStack(spacing: 30) {
             Text("Timer")
@@ -22,6 +25,32 @@ struct ContentView: View {
                 .font(.system(size: 70, weight: .medium))
                 .frame(minWidth: 200)
                 .padding(.vertical, 20)
+            
+            if !isTimerRunning {
+                HStack(spacing: 20) {
+                    Picker("Minutes", selection: $selectedMinutes) {
+                        ForEach(0..<60) { minute in
+                            Text("\(minute) min").tag(minute)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(width: 100)
+                    .onChange(of: selectedMinutes) {
+                        updateTimeRemaining()
+                    }
+
+                    Picker("Seconds", selection: $selectedSeconds) {
+                        ForEach(0..<60) { second in
+                            Text("\(second) sec").tag(second)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(width: 100)
+                    .onChange(of: selectedSeconds) {
+                        updateTimeRemaining()
+                    }
+                }
+            }
             
             HStack(spacing: 30) {
                 Button(action: {
@@ -52,20 +81,16 @@ struct ContentView: View {
                         .cornerRadius(10)
                 }
             }
-            
-            Slider(value: Binding(
-                get: { Double(timeRemaining) },
-                set: { newValue in
-                    timeRemaining = Int(newValue)
-                }
-            ), in: 5...300, step: 5)
-            .padding()
-            .disabled(isTimerRunning)
         }
         .padding()
     }
     
+    func updateTimeRemaining() {
+        timeRemaining = selectedMinutes * 60 + selectedSeconds
+    }
+    
     func startTimer() {
+        updateTimeRemaining()
         isTimerRunning = true
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             if timeRemaining > 0 {
@@ -84,7 +109,9 @@ struct ContentView: View {
     
     func resetTimer() {
         pauseTimer()
-        timeRemaining = 60 // Reset to default value
+        selectedMinutes = 1
+        selectedSeconds = 0
+        updateTimeRemaining()
     }
     
     func timeString(time: Int) -> String {
