@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var timeRemaining = 60
     @State private var isTimerRunning = false
     @State private var timer: Timer?
+    @State private var selectedHours = 0
     @State private var selectedMinutes = 1
     @State private var selectedSeconds = 0
     
@@ -18,7 +19,7 @@ struct ContentView: View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             VStack(spacing: 30) {
-                Text("ZenTime")
+                Text("Timer")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.purple)
@@ -29,11 +30,19 @@ struct ContentView: View {
                     .padding(.vertical, 20)
                 if !isTimerRunning {
                     HStack(spacing: 20) {
+                        Picker("Hours", selection: $selectedHours) {
+                            ForEach(0..<24) { hour in
+                                Text("\(hour) hr").tag(hour).foregroundColor(.white)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(width: 100)
+                        .onChange(of: selectedHours) {
+                            updateTimeRemaining()
+                        }
                         Picker("Minutes", selection: $selectedMinutes) {
                             ForEach(0..<60) { minute in
-                                Text("\(minute) min")
-                                    .tag(minute)
-                                    .foregroundColor(.white)
+                                Text("\(minute) min").tag(minute).foregroundColor(.white)
                             }
                         }
                         .pickerStyle(.wheel)
@@ -43,9 +52,7 @@ struct ContentView: View {
                         }
                         Picker("Seconds", selection: $selectedSeconds) {
                             ForEach(0..<60) { second in
-                                Text("\(second) sec")
-                                    .tag(second)
-                                    .foregroundColor(.white)
+                                Text("\(second) sec").tag(second).foregroundColor(.white)
                             }
                         }
                         .pickerStyle(.wheel)
@@ -88,7 +95,7 @@ struct ContentView: View {
         }
     }
     func updateTimeRemaining() {
-        timeRemaining = selectedMinutes * 60 + selectedSeconds
+        timeRemaining = (selectedHours * 3600) + (selectedMinutes * 60) + selectedSeconds
     }
     func startTimer() {
         updateTimeRemaining()
@@ -108,14 +115,16 @@ struct ContentView: View {
     }
     func resetTimer() {
         pauseTimer()
+        selectedHours = 0
         selectedMinutes = 1
         selectedSeconds = 0
         updateTimeRemaining()
     }
     func timeString(time: Int) -> String {
-        let minutes = time / 60
+        let hours = time / 3600
+        let minutes = (time % 3600) / 60
         let seconds = time % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }
 
