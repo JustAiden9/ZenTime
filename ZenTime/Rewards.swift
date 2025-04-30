@@ -5,6 +5,8 @@
 //  Created by Aiden Baker on 4/29/25.
 //
 
+// Simple Implemntation for father use later, we will link it into contentview later
+
 import SwiftUI
 
 struct Rewards: View {
