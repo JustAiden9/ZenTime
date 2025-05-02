@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @State private var timeRemaining = 60
     @State private var isTimerRunning = false
+    @State private var isPaused = false
     @State private var timer: Timer?
     @State private var selectedHours = 0
     @State private var selectedMinutes = 1
@@ -45,7 +46,7 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .frame(minWidth: 200)
                     .padding(.vertical, 20)
-                if !isTimerRunning {
+                if !isTimerRunning && !isPaused {
                     HStack(spacing: 20) {
                         Picker("Hours", selection: $selectedHours) {
                             ForEach(0..<24) { hour in
@@ -84,9 +85,17 @@ struct ContentView: View {
 
                 HStack(spacing: 30) {
                     Button(action: {
-                        isTimerRunning ? pauseTimer() : startTimer()
+                        if isTimerRunning {
+                            pauseTimer()
+                        } else {
+                            if isPaused {
+                                resumeTimer()
+                            } else {
+                                startTimer()
+                            }
+                        }
                     }) {
-                        Text(isTimerRunning ? "Pause" : "Start")
+                        Text(isTimerRunning ? "Pause" : (isPaused ? "Resume" : "Start"))
                             .font(.title2)
                             .fontWeight(.semibold)
                             .frame(width: 100)
@@ -118,19 +127,35 @@ struct ContentView: View {
     func startTimer() {
         updateTimeRemaining()
         isTimerRunning = true
+        isPaused = false
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             if timeRemaining > 0 {
                 timeRemaining -= 1
             } else {
                 pauseTimer()
-                badgesEarned += 1 // Reward badge after session
-                selectedTab = 1    // Auto-switch to Rewards tab
+                badgesEarned += 1
+                selectedTab = 1
+            }
+        }
+    }
+
+    func resumeTimer() {
+        isTimerRunning = true
+        isPaused = false
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            } else {
+                pauseTimer()
+                badgesEarned += 1
+                selectedTab = 1
             }
         }
     }
 
     func pauseTimer() {
         isTimerRunning = false
+        isPaused = true
         timer?.invalidate()
         timer = nil
     }
@@ -141,6 +166,7 @@ struct ContentView: View {
         selectedMinutes = 1
         selectedSeconds = 0
         updateTimeRemaining()
+        isPaused = false
     }
 
     func timeString(time: Int) -> String {
@@ -150,7 +176,6 @@ struct ContentView: View {
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }
-
 
 #Preview {
     ContentView()
