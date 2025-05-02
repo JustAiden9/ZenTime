@@ -14,8 +14,25 @@ struct ContentView: View {
     @State private var selectedHours = 0
     @State private var selectedMinutes = 1
     @State private var selectedSeconds = 0
-    
+    @State private var badgesEarned = 0
+    @State private var selectedTab = 0
+
     var body: some View {
+        TabView(selection: $selectedTab) {
+            timerView
+                .tag(0)
+                .tabItem {
+                    Label("Timer", systemImage: "timer")
+                }
+            Rewards(badges: $badgesEarned)
+                .tag(1)
+                .tabItem {
+                    Label("Rewards", systemImage: "star.fill")
+                }
+        }
+    }
+
+    var timerView: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             VStack(spacing: 30) {
@@ -40,6 +57,7 @@ struct ContentView: View {
                         .onChange(of: selectedHours) {
                             updateTimeRemaining()
                         }
+
                         Picker("Minutes", selection: $selectedMinutes) {
                             ForEach(0..<60) { minute in
                                 Text("\(minute) min").tag(minute).foregroundColor(.white)
@@ -50,6 +68,7 @@ struct ContentView: View {
                         .onChange(of: selectedMinutes) {
                             updateTimeRemaining()
                         }
+
                         Picker("Seconds", selection: $selectedSeconds) {
                             ForEach(0..<60) { second in
                                 Text("\(second) sec").tag(second).foregroundColor(.white)
@@ -62,13 +81,10 @@ struct ContentView: View {
                         }
                     }
                 }
+
                 HStack(spacing: 30) {
                     Button(action: {
-                        if isTimerRunning {
-                            pauseTimer()
-                        } else {
-                            startTimer()
-                        }
+                        isTimerRunning ? pauseTimer() : startTimer()
                     }) {
                         Text(isTimerRunning ? "Pause" : "Start")
                             .font(.title2)
@@ -94,9 +110,11 @@ struct ContentView: View {
             .padding()
         }
     }
+
     func updateTimeRemaining() {
         timeRemaining = (selectedHours * 3600) + (selectedMinutes * 60) + selectedSeconds
     }
+
     func startTimer() {
         updateTimeRemaining()
         isTimerRunning = true
@@ -105,14 +123,18 @@ struct ContentView: View {
                 timeRemaining -= 1
             } else {
                 pauseTimer()
+                badgesEarned += 1 // Reward badge after session
+                selectedTab = 1    // Auto-switch to Rewards tab
             }
         }
     }
+
     func pauseTimer() {
         isTimerRunning = false
         timer?.invalidate()
         timer = nil
     }
+
     func resetTimer() {
         pauseTimer()
         selectedHours = 0
@@ -120,6 +142,7 @@ struct ContentView: View {
         selectedSeconds = 0
         updateTimeRemaining()
     }
+
     func timeString(time: Int) -> String {
         let hours = time / 3600
         let minutes = (time % 3600) / 60
@@ -127,6 +150,7 @@ struct ContentView: View {
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }
+
 
 #Preview {
     ContentView()
