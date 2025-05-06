@@ -17,8 +17,27 @@ struct Rewards: View {
             Text("🏅 Rewards")
                 .font(.largeTitle)
                 .bold()
-            Text("Badges Earned: \(badges)")
+
+            // Row of badge emojis
+            if badges > 0 {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(0..<badges, id: \.self) { _ in
+                            Text("🏅")
+                                .font(.system(size: 40))
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            } else {
+                Text("No badges yet — complete a session to earn one!")
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+            }
+
+            Text("You’ve earned \(badges) badge\(badges == 1 ? "" : "s")!")
                 .font(.title2)
+
             Text("Earn badges by completing study sessions!")
                 .foregroundColor(.gray)
         }
