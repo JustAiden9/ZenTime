@@ -19,8 +19,7 @@
 
 | Timer Tab | Rewards Tab |
 |-----------|-------------|
-| ![TimerView Screenshot](https://github.com/user-attachments/assets/d5af989f-bf19-4d9a-bbd4-cfcb347ccb69) | ![RewardsView Screenshot](https://github.com/user-attachments/assets/6ca5b266-9796-4918-82d1-fd392ce81350) |
-
+| ![TimerView Screenshot](https://github.com/user-attachments/assets/bd9432cd-9929-4cd4-930d-ca61da84a43c) | ![RewardsView Screenshot](https://github.com/user-attachments/assets/6ca5b266-9796-4918-82d1-fd392ce81350) |
 
 ---
 
