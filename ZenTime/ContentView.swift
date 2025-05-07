@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct ContentView: View {
     @State private var timeRemaining = 60 // how many seconds are left on the timer
@@ -17,6 +18,7 @@ struct ContentView: View {
     @State private var selectedSeconds = 0 // Seconds chosen by user.
     @State private var badgesEarned = 0 // Keeps track of how many "badges" (rewards) the user has earned.
     @State private var selectedTab = 0 // Tracks which tab the user is on.
+    @State private var audioPlayer: AVAudioPlayer?
 
     // This is the layout for the screen/tab bar
     var body: some View {
@@ -124,6 +126,21 @@ struct ContentView: View {
     func updateTimeRemaining() {
         timeRemaining = (selectedHours * 3600) + (selectedMinutes * 60) + selectedSeconds
     }
+    
+    func playSound() {
+        guard let soundURL = Bundle.main.url(forResource: "alarm", withExtension: "mp3") else {
+            print("Sound file not found")
+            return
+        }
+        
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+            audioPlayer?.play()
+        } catch {
+            print("Unable to play sound: \(error.localizedDescription)")
+        }
+    }
+
 
     func startTimer() {
         updateTimeRemaining()
@@ -134,6 +151,7 @@ struct ContentView: View {
                 timeRemaining -= 1
             } else {
                 pauseTimer()
+                playSound()
                 badgesEarned += 1
                 selectedTab = 1
             }
@@ -148,11 +166,13 @@ struct ContentView: View {
                 timeRemaining -= 1
             } else {
                 pauseTimer()
+                playSound()
                 badgesEarned += 1
                 selectedTab = 1
             }
         }
     }
+
 
     func pauseTimer() {
         isTimerRunning = false
