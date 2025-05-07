@@ -38,7 +38,7 @@ struct ContentView: View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             VStack(spacing: 30) {
-                Text("Timer")
+                Text("ZenTime")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.purple)
