@@ -6,34 +6,70 @@
 //
 
 import SwiftUI
+import AVFoundation // This lets us play sounds (like an alarm)
 
 struct ContentView: View {
-    @State private var timeRemaining = 60
-    @State private var isTimerRunning = false
+    @State private var timeRemaining = 60 // how many seconds are left on the timer
+    @State private var isTimerRunning = false // checks if the timer currently counting down
+    @State private var isPaused = false // did the user pause the timer
     @State private var timer: Timer?
-    @State private var selectedMinutes = 1
-    @State private var selectedSeconds = 0
-    
+    @State private var selectedHours = 0 // Hours chosen by user.
+    @State private var selectedMinutes = 1 // Minutes chosen by user.
+    @State private var selectedSeconds = 0 // Seconds chosen by user.
+    @State private var badgesEarned = 0 // Keeps track of how many "badges" (rewards) the user has earned.
+    @State private var selectedTab = 0 // Tracks which tab the user is on.
+    @State private var audioPlayer: AVAudioPlayer? // Used to play sound when timer ends
+
+    // This is the layout for the screen/tab bar
     var body: some View {
+        TabView(selection: $selectedTab) { // lets user switch between two tabs
+            timerView // the timer screen
+                .tag(0)
+                .tabItem {
+                    Label("Timer", systemImage: "timer")
+                }
+            Rewards(badges: $badgesEarned) // the rewards screen
+                .tag(1)
+                .tabItem {
+                    Label("Rewards", systemImage: "star.fill")
+                }
+        }
+    }
+
+    var timerView: some View { // This is the view for the timer screen
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             VStack(spacing: 30) {
+                // App title
                 Text("ZenTime")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.purple)
+                // Show the countdown timer as a digital clock
                 Text(timeString(time: timeRemaining))
                     .font(.system(size: 70, weight: .medium))
                     .foregroundColor(.white)
                     .frame(minWidth: 200)
                     .padding(.vertical, 20)
-                if !isTimerRunning {
+                // Show the time picker only if the timer hasn't started or isn't paused
+                if !isTimerRunning && !isPaused {
                     HStack(spacing: 20) {
+                        // Picker for selecting hours
+                        Picker("Hours", selection: $selectedHours) {
+                            ForEach(0..<24) { hour in
+                                Text("\(hour) hr").tag(hour).foregroundColor(.white)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(width: 100)
+                        .onChange(of: selectedHours) {
+                            updateTimeRemaining()
+                        }
+
+                        // Picker for selecting minutes
                         Picker("Minutes", selection: $selectedMinutes) {
                             ForEach(0..<60) { minute in
-                                Text("\(minute) min")
-                                    .tag(minute)
-                                    .foregroundColor(.white)
+                                Text("\(minute) min").tag(minute).foregroundColor(.white)
                             }
                         }
                         .pickerStyle(.wheel)
@@ -41,11 +77,11 @@ struct ContentView: View {
                         .onChange(of: selectedMinutes) {
                             updateTimeRemaining()
                         }
+
+                        // Picker for selecting seconds
                         Picker("Seconds", selection: $selectedSeconds) {
                             ForEach(0..<60) { second in
-                                Text("\(second) sec")
-                                    .tag(second)
-                                    .foregroundColor(.white)
+                                Text("\(second) sec").tag(second).foregroundColor(.white)
                             }
                         }
                         .pickerStyle(.wheel)
@@ -55,15 +91,21 @@ struct ContentView: View {
                         }
                     }
                 }
+
+                // Buttons to start/pause/resume and reset the timer
                 HStack(spacing: 30) {
                     Button(action: {
                         if isTimerRunning {
                             pauseTimer()
                         } else {
-                            startTimer()
+                            if isPaused {
+                                resumeTimer()
+                            } else {
+                                startTimer()
+                            }
                         }
                     }) {
-                        Text(isTimerRunning ? "Pause" : "Start")
+                        Text(isTimerRunning ? "Pause" : (isPaused ? "Resume" : "Start"))
                             .font(.title2)
                             .fontWeight(.semibold)
                             .frame(width: 100)
@@ -87,35 +129,83 @@ struct ContentView: View {
             .padding()
         }
     }
+
+    // This function updates how many seconds are left based on the pickers
     func updateTimeRemaining() {
-        timeRemaining = selectedMinutes * 60 + selectedSeconds
+        timeRemaining = (selectedHours * 3600) + (selectedMinutes * 60) + selectedSeconds
     }
+    // This plays a sound when the timer ends
+    func playSound() {
+        guard let soundURL = Bundle.main.url(forResource: "alarm", withExtension: "mp3") else {
+            print("Sound file not found")
+            return
+        }
+        
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+            audioPlayer?.play()
+        } catch {
+            print("Unable to play sound: \(error.localizedDescription)")
+        }
+    }
+    
+    // This starts the timer and begins counting down every second
     func startTimer() {
         updateTimeRemaining()
         isTimerRunning = true
+        isPaused = false
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             if timeRemaining > 0 {
                 timeRemaining -= 1
             } else {
                 pauseTimer()
+                playSound()
+                badgesEarned += 1 // Reward the user with a badge
+                selectedTab = 1 // Switch to the rewards tab
             }
         }
     }
+
+    // This resumes the timer from a paused state
+    func resumeTimer() {
+        isTimerRunning = true
+        isPaused = false
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            } else {
+                pauseTimer()
+                playSound()
+                badgesEarned += 1
+                selectedTab = 1
+            }
+        }
+    }
+    
+    // This pauses the timer
     func pauseTimer() {
         isTimerRunning = false
-        timer?.invalidate()
-        timer = nil
+        isPaused = true
+        timer?.invalidate() // Stops the timer from firing
+        timer = nil // Setting it to `nil` means "this Timer no longer exists." / gets removed and does not mix up future timers
     }
+    
+    // This resets the timer to the values chosen in the pickers
     func resetTimer() {
         pauseTimer()
+        selectedHours = 0
         selectedMinutes = 1
         selectedSeconds = 0
         updateTimeRemaining()
+        isPaused = false
     }
+    
+    // This formats the remaining time as a string like "00:01:30"
     func timeString(time: Int) -> String {
-        let minutes = time / 60
+        let hours = time / 3600
+        let minutes = (time % 3600) / 60
         let seconds = time % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }
 
