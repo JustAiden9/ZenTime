@@ -19,9 +19,8 @@
 
 | Timer Tab | Rewards Tab |
 |-----------|-------------|
-| ![TimerView Screenshot](#) | ![RewardsView Screenshot](#) |
+| ![TimerView Screenshot](https://github.com/user-attachments/assets/d5af989f-bf19-4d9a-bbd4-cfcb347ccb69) | ![RewardsView Screenshot](https://github.com/user-attachments/assets/6ca5b266-9796-4918-82d1-fd392ce81350) |
 
-> *(Add your own screenshots or leave this out if not ready)*
 
 ---
 
