@@ -38,3 +38,27 @@
 1. Clone the repository  
    ```bash
    git clone https://github.com/justaiden/zentime.git
+   
+
+### 🛠️ Roadmap
+
+- Save badge history between app launches
+
+- Add daily streak tracking
+
+- Customizable alarm sounds
+
+- Light mode toggle
+
+- Home screen widgets
+
+### 💡 Inspiration
+ZenTime was created as a fun, beginner-friendly SwiftUI project to help boost productivity in a calming and rewarding way. Built with students in mind, but great for anyone who wants to focus better.
+
+### 📄 License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+### 🙌 Contributing
+Pull requests are welcome! For major changes, please open an issue first to discuss what you’d like to change.
+
+
