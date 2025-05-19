@@ -42,10 +42,59 @@ struct Rewards: View {
                     .font(.title2)
                     .foregroundColor(.white)
 
-                Text("Earn badges by completing study sessions!")
+                Text("Spend badges on fun perks!")
                     .foregroundColor(.gray)
+
+                VStack(spacing: 10) {
+                    RewardItem(title: "5-Min Break", cost: 2, badges: $badges)
+                    RewardItem(title: "Meme", cost: 3, badges: $badges)
+                    RewardItem(title: "Snack Time Break", cost: 5, badges: $badges)
+                }
             }
             .padding()
+        }
+    }
+}
+
+struct RewardItem: View {
+    let title: String
+    let cost: Int
+    @Binding var badges: Int
+    @State private var showMessage = false
+
+    var body: some View {
+        VStack {
+            Button(action: {
+                if badges >= cost {
+                    badges -= cost
+                    showMessage = true
+                }
+            }) {
+                HStack {
+                    Text(title)
+                        .foregroundColor(.white)
+                    Spacer()
+                    Text("\(cost) 🏅")
+                        .foregroundColor(.yellow)
+                }
+                .padding()
+                .background(Color.purple.opacity(0.7))
+                .cornerRadius(10)
+            }
+
+            if showMessage {
+                Text("✅ Redeemed!")
+                    .font(.caption)
+                    .foregroundColor(.green)
+                    .transition(.opacity)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation {
+                                showMessage = false
+                            }
+                        }
+                    }
+            }
         }
     }
 }

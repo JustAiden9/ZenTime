@@ -9,26 +9,25 @@ import SwiftUI
 import AVFoundation
 
 struct ContentView: View {
-    @State private var timeRemaining = 60 // how many seconds are left on the timer
-    @State private var isTimerRunning = false // checks if the timer currently counting down
-    @State private var isPaused = false // did the user pause the timer
+    @AppStorage("badgesEarned") private var badgesEarned = 0
+    @State private var timeRemaining = 60
+    @State private var isTimerRunning = false
+    @State private var isPaused = false
     @State private var timer: Timer?
-    @State private var selectedHours = 0 // Hours chosen by user.
-    @State private var selectedMinutes = 1 // Minutes chosen by user.
-    @State private var selectedSeconds = 0 // Seconds chosen by user.
-    @State private var badgesEarned = 0 // Keeps track of how many "badges" (rewards) the user has earned.
-    @State private var selectedTab = 0 // Tracks which tab the user is on.
+    @State private var selectedHours = 0
+    @State private var selectedMinutes = 1
+    @State private var selectedSeconds = 0
+    @State private var selectedTab = 0
     @State private var audioPlayer: AVAudioPlayer?
 
-    // This is the layout for the screen/tab bar
     var body: some View {
-        TabView(selection: $selectedTab) { // lets user switch between two tabs
-            timerView // the timer screen
+        TabView(selection: $selectedTab) {
+            timerView
                 .tag(0)
                 .tabItem {
                     Label("Timer", systemImage: "timer")
                 }
-            Rewards(badges: $badgesEarned) // the rewards screen
+            Rewards(badges: $badgesEarned)
                 .tag(1)
                 .tabItem {
                     Label("Rewards", systemImage: "star.fill")
@@ -36,7 +35,7 @@ struct ContentView: View {
         }
     }
 
-    var timerView: some View { // This is the view for the timer screen
+    var timerView: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             VStack(spacing: 30) {
@@ -44,11 +43,13 @@ struct ContentView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.purple)
+
                 Text(timeString(time: timeRemaining))
                     .font(.system(size: 70, weight: .medium))
                     .foregroundColor(.white)
                     .frame(minWidth: 200)
                     .padding(.vertical, 20)
+
                 if !isTimerRunning && !isPaused {
                     HStack(spacing: 20) {
                         Picker("Hours", selection: $selectedHours) {
@@ -107,6 +108,7 @@ struct ContentView: View {
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
+
                     Button(action: resetTimer) {
                         Text("Reset")
                             .font(.title2)
@@ -126,21 +128,16 @@ struct ContentView: View {
     func updateTimeRemaining() {
         timeRemaining = (selectedHours * 3600) + (selectedMinutes * 60) + selectedSeconds
     }
-    
+
     func playSound() {
         guard let soundURL = Bundle.main.url(forResource: "alarm", withExtension: "mp3") else {
-            print("Sound file not found")
             return
         }
-        
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer?.play()
-        } catch {
-            print("Unable to play sound: \(error.localizedDescription)")
-        }
+        } catch {}
     }
-
 
     func startTimer() {
         updateTimeRemaining()
@@ -172,7 +169,6 @@ struct ContentView: View {
             }
         }
     }
-
 
     func pauseTimer() {
         isTimerRunning = false
